@@ -539,7 +539,7 @@ async function lookup() {
   resultEl.innerHTML = `<div class="state">searching records for ${escapeHtml(id)}<span class="cursor"></span></div>`;
 
   try {
-    const res = await fetch(`https://discordlookup.mesalytic.moe/v1/user/${encodeURIComponent(id)}`);
+    const res = await fetch(`https://quiet-haze-9c51.joemama9bsh.workers.dev/${encodeURIComponent(id)}`);
     if (!res.ok) {
       if (res.status === 404) {
         resultEl.innerHTML = `<div class="state error">No account found for that ID. Double-check it was copied correctly.</div>`;
