@@ -6,491 +6,308 @@
 <title>Case File — Discord ID Trace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <style>
   :root {
-    --paper: #0d0c0c;
-    --paper-2: #151312;
-    --ink: #e9e4dd;
-    --ink-dim: #9a9088;
-    --rule: #3a3230;
-    --red: #b8121f;
-    --red-bright: #d81f2c;
-    color-scheme: dark;
-    --font-head: 'Bitter', serif;
-    --font-type: 'Courier Prime', monospace;
+    --bg: #0a0a0c; --bg-2: #131316; --ink: #ece7db; --ink-dim: #8b8579;
+    --line: #2a2a2e; --red: #c8202f; --red-glow: #ff3b3b; --brass: #b08a4e;
+    color-scheme: dark; --font-display: 'Fraunces', serif; --font-mono: 'Space Mono', monospace;
   }
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --paper: #efe9dc;
-      --paper-2: #e6ded0;
-      --ink: #201c18;
-      --ink-dim: #6b6156;
-      --rule: #c9bfa9;
-      --red: #a3101c;
-      --red-bright: #c21a26;
-      color-scheme: light;
+      --bg: #ece6d6; --bg-2: #e2dac5; --ink: #1c1a15; --ink-dim: #6d6553;
+      --line: #cfc4a3; --red: #a3121f; --red-glow: #c8202f; --brass: #8a6a35; color-scheme: light;
     }
   }
   :root[data-theme="light"] {
-    --paper: #efe9dc;
-    --paper-2: #e6ded0;
-    --ink: #201c18;
-    --ink-dim: #6b6156;
-    --rule: #c9bfa9;
-    --red: #a3101c;
-    --red-bright: #c21a26;
-    color-scheme: light;
+    --bg: #ece6d6; --bg-2: #e2dac5; --ink: #1c1a15; --ink-dim: #6d6553;
+    --line: #cfc4a3; --red: #a3121f; --red-glow: #c8202f; --brass: #8a6a35; color-scheme: light;
   }
 
   * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    min-height: 100vh;
-    background: var(--paper);
-    color: var(--ink);
-    font-family: var(--font-type);
-  }
+  html, body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink); font-family: var(--font-mono); overflow-x: hidden; }
 
-  .texture {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image: radial-gradient(color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px);
-    background-size: 3px 3px;
-    opacity: 0.55;
-  }
+  .field { position: fixed; inset: 0; z-index: -2; pointer-events: none;
+    background-image: radial-gradient(color-mix(in srgb, var(--ink) 8%, transparent) 1px, transparent 1px);
+    background-size: 26px 26px; }
+  .field::after { content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 900px 500px at 50% -10%, color-mix(in srgb, var(--red) 14%, transparent), transparent 70%); }
 
-  .wrap {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 44px 26px 80px;
-  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 90px; }
 
-  /* letterhead */
-  .letterhead {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    font-size: 12px;
-    letter-spacing: 0.03em;
-    color: var(--ink-dim);
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--ink);
-  }
+  .letterhead { display: flex; justify-content: space-between; align-items: center; font-size: 11px;
+    letter-spacing: 0.08em; color: var(--ink-dim); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
   .letterhead b { color: var(--ink); }
+  .pulse-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--red-glow);
+    margin-right: 6px; box-shadow: 0 0 6px var(--red-glow); animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
 
-  .layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-    gap: 0 48px;
-    align-items: start;
-  }
-  .main-col { min-width: 0; border-right: 1px solid var(--rule); padding-right: 48px; }
-  .side-col { padding-top: 30px; }
-  @media (max-width: 880px) {
-    .layout { grid-template-columns: 1fr; }
-    .main-col { border-right: none; padding-right: 0; }
-  }
+  .theme-toggle { background: transparent; border: 1px solid var(--line); color: var(--ink-dim);
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; padding: 5px 10px; cursor: pointer; }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--ink-dim); }
 
-  header {
-    position: relative;
-    padding: 30px 0 26px;
-  }
-  h1.title {
-    font-family: var(--font-head);
-    font-weight: 900;
-    font-size: clamp(32px, 5vw, 46px);
-    line-height: 1.05;
-    letter-spacing: -0.01em;
-    margin: 0 0 16px;
-    max-width: 12ch;
-  }
-  header p.lede {
-    font-size: 14.5px;
-    line-height: 1.7;
-    color: var(--ink-dim);
-    max-width: 52ch;
-    margin: 0;
-  }
+  .hero { display: grid; grid-template-columns: 1fr auto; gap: 30px; align-items: center;
+    padding: 48px 0 40px; border-bottom: 1px solid var(--line); }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; text-align: center; } }
 
-  .stamp {
-    position: absolute;
-    top: 18px;
-    right: 0;
-    transform: rotate(-7deg);
-    border: 3px solid var(--red);
-    padding: 6px 12px;
-    color: var(--red);
-    font-family: var(--font-head);
-    font-weight: 900;
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    opacity: 0.9;
-    mix-blend-mode: multiply;
-  }
-  @media (max-width: 560px) { .stamp { position: static; display: inline-block; margin-bottom: 14px; transform: rotate(-3deg); } }
+  h1.title { font-family: var(--font-display); font-weight: 900; font-optical-sizing: auto;
+    font-size: clamp(34px, 5.4vw, 58px); line-height: 1.02; letter-spacing: -0.015em; margin: 0 0 18px; max-width: 11ch; }
+  .hero p.lede { font-size: 14.5px; line-height: 1.75; color: var(--ink-dim); max-width: 46ch; margin: 0; }
+  @media (max-width: 760px) { .hero p.lede { margin: 0 auto; } }
 
-  .intake {
-    border-top: 3px double var(--ink);
-    border-bottom: 3px double var(--ink);
-    padding: 22px 0;
-  }
-  .intake label {
-    display: block;
-    font-size: 11.5px;
-    letter-spacing: 0.06em;
-    color: var(--ink-dim);
-    margin-bottom: 8px;
-  }
-  .search-row {
-    display: flex;
-    gap: 0;
-    align-items: stretch;
-  }
-  input#idInput {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid var(--ink);
-    padding: 8px 4px;
-    color: var(--ink);
-    font-family: var(--font-type);
-    font-weight: 700;
-    font-size: 16px;
-    outline: none;
-    min-width: 0;
-    border-radius: 0;
-  }
+  .print-wrap { width: 190px; height: 190px; flex-shrink: 0; }
+  @media (max-width: 760px) { .print-wrap { margin: 0 auto; } }
+  .print-svg path { fill: none; stroke: var(--red); stroke-width: 1.6; stroke-linecap: round;
+    stroke-dasharray: 340; stroke-dashoffset: 340; animation: draw 2.4s cubic-bezier(.2,.7,.3,1) forwards; }
+  .print-svg path:nth-child(1) { animation-delay: 0s; }
+  .print-svg path:nth-child(2) { animation-delay: .08s; stroke: color-mix(in srgb, var(--red) 80%, var(--ink)); }
+  .print-svg path:nth-child(3) { animation-delay: .16s; }
+  .print-svg path:nth-child(4) { animation-delay: .24s; stroke: color-mix(in srgb, var(--red) 60%, var(--ink)); }
+  .print-svg path:nth-child(5) { animation-delay: .32s; }
+  .print-svg path:nth-child(6) { animation-delay: .4s; stroke: var(--brass); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @media (prefers-reduced-motion: reduce) { .print-svg path { animation: none; stroke-dashoffset: 0; } }
+
+  /* ---------- MODE TABS ---------- */
+  .mode-tabs { display: flex; gap: 0; margin-top: 34px; border-bottom: 1px solid var(--line); }
+  .mode-tab { background: transparent; border: none; color: var(--ink-dim); font-family: var(--font-mono);
+    font-size: 12px; letter-spacing: 0.05em; padding: 10px 4px; margin-right: 24px; cursor: pointer;
+    border-bottom: 2px solid transparent; }
+  .mode-tab.active { color: var(--ink); border-bottom-color: var(--red); }
+
+  .intake { padding: 24px 0 30px; border-bottom: 1px solid var(--line); }
+  .intake label { display: block; font-size: 11px; letter-spacing: 0.08em; color: var(--ink-dim); margin-bottom: 10px; }
+  .console { position: relative; border: 1px solid var(--line); background: color-mix(in srgb, var(--bg-2) 70%, transparent); padding: 4px; }
+  .console::before, .console::after { content: ''; position: absolute; width: 10px; height: 10px; border: 1.5px solid var(--red); pointer-events: none; }
+  .console::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .console::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .search-row { display: flex; }
+  input#idInput { flex: 1; background: transparent; border: none; padding: 14px 12px;
+    color: var(--ink); font-family: var(--font-mono); font-weight: 700; font-size: 16px; outline: none; min-width: 0; }
   input#idInput::placeholder { color: var(--ink-dim); font-weight: 400; }
-  input#idInput:focus { border-bottom-color: var(--red); }
 
-  button#lookupBtn {
-    margin-left: 16px;
-    background: var(--red);
-    color: var(--paper);
-    border: none;
-    padding: 0 20px;
-    font-family: var(--font-head);
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.12s ease;
-    border-radius: 0;
-  }
-  button#lookupBtn:hover { background: var(--red-bright); }
-  button#lookupBtn:active { transform: translateY(1px); }
-  button#lookupBtn:disabled { opacity: 0.5; cursor: default; }
+  textarea#batchInput { width: 100%; background: transparent; border: none; padding: 14px 12px;
+    color: var(--ink); font-family: var(--font-mono); font-weight: 700; font-size: 14px; outline: none;
+    resize: vertical; min-height: 110px; line-height: 1.7; }
+  textarea#batchInput::placeholder { color: var(--ink-dim); font-weight: 400; }
 
-  .hint {
-    color: var(--ink-dim);
-    font-size: 12.5px;
-    margin-top: 14px;
-    line-height: 1.55;
-  }
+  button.action-btn { background: var(--red); color: #fff; border: none; padding: 0 22px;
+    font-family: var(--font-mono); font-weight: 700; font-size: 12.5px; letter-spacing: 0.05em;
+    cursor: pointer; transition: background .15s ease, transform .1s ease; }
+  button.action-btn:hover { background: var(--red-glow); }
+  button.action-btn:active { transform: scale(0.97); }
+  button.action-btn:disabled { opacity: 0.55; cursor: default; }
+  .batch-footer { display: flex; justify-content: flex-end; padding: 10px 12px 4px; }
+
+  .hint { color: var(--ink-dim); font-size: 12.5px; margin-top: 14px; line-height: 1.6; }
   .hint b { color: var(--ink); font-weight: 700; }
 
+  /* ---------- HISTORY ---------- */
+  .history-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .history-chip { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg-2) 60%, transparent); padding: 4px 10px 4px 4px;
+    font-size: 11.5px; color: var(--ink-dim); cursor: pointer; }
+  .history-chip:hover { border-color: var(--red); color: var(--ink); }
+  .history-chip img { width: 18px; height: 18px; border-radius: 50%; display: block; }
+  .history-chip .hc-fallback { width: 18px; height: 18px; border-radius: 50%; background: var(--line);
+    display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
+  .history-clear { background: transparent; border: none; color: var(--ink-dim); font-family: var(--font-mono);
+    font-size: 11px; text-decoration: underline; cursor: pointer; padding: 4px 6px; }
+
+  /* ---------- RESULT ---------- */
   #result { margin-top: 0; }
+  .radar-state { display: flex; align-items: center; gap: 16px; padding: 26px 0; color: var(--ink-dim); font-size: 13.5px; }
+  .radar { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); position: relative; flex-shrink: 0; overflow: hidden; }
+  .radar::before { content: ''; position: absolute; inset: 0;
+    background: conic-gradient(from 0deg, transparent 0deg, color-mix(in srgb, var(--red) 70%, transparent) 30deg, transparent 60deg);
+    animation: spin 1.1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .radar::before { animation: none; } }
 
-  .sheet {
-    margin-top: 26px;
-    border-top: 1px solid var(--rule);
-    padding-top: 22px;
-  }
+  .state.error { color: var(--red-glow); padding: 22px 0; font-size: 13.5px; }
+  .state.error .retry-note { display: block; margin-top: 8px; font-size: 12.5px; color: var(--ink-dim); }
 
-  .subject-row {
-    display: flex;
-    gap: 20px;
-  }
+  .sheet { margin-top: 24px; padding-top: 4px; animation: stampIn .35s cubic-bezier(.2,.8,.3,1); }
+  @keyframes stampIn { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: scale(1); } }
+
+  .subject-row { display: flex; gap: 22px; border: 1px solid var(--line); padding: 22px; position: relative; }
+  .verified-stamp { position: absolute; top: 14px; right: 14px; border: 2px solid var(--brass); color: var(--brass);
+    font-family: var(--font-display); font-weight: 700; font-size: 11px; letter-spacing: 0.06em;
+    padding: 4px 9px; transform: rotate(4deg); opacity: 0.85; }
+  @media (max-width: 560px) { .verified-stamp { position: static; display: inline-block; margin-bottom: 10px; } }
+
   .photo-block { flex-shrink: 0; text-align: center; }
-  .photo {
-    width: 84px;
-    height: 84px;
-    object-fit: cover;
-    border: 2px solid var(--ink);
-    filter: grayscale(0.35) contrast(1.05);
-    display: block;
-  }
-  .photo.fallback {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-head);
-    font-weight: 900;
-    font-size: 30px;
-    color: var(--ink-dim);
-    background: var(--paper-2);
-  }
-  .photo-tag {
-    font-size: 9px;
-    letter-spacing: 0.06em;
-    color: var(--ink-dim);
-    margin-top: 5px;
-  }
+  .photo { width: 88px; height: 88px; object-fit: cover; border: 2px solid var(--ink); display: block; }
+  .photo.fallback { display: flex; align-items: center; justify-content: center; font-family: var(--font-display);
+    font-weight: 900; font-size: 32px; color: var(--ink-dim); background: var(--bg-2); width: 88px; height: 88px; }
+  .photo-tag { font-size: 9px; letter-spacing: 0.06em; color: var(--ink-dim); margin-top: 6px; }
 
   .subject-fields { flex: 1; min-width: 0; }
-  .fld {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    font-size: 14px;
-    margin-bottom: 7px;
-  }
-  .fld .k {
-    color: var(--ink-dim);
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
-  .fld .leader {
-    flex: 1;
-    border-bottom: 1px dotted var(--rule);
-    margin: 0 2px;
-    min-width: 12px;
-  }
+  .fld { display: flex; align-items: baseline; gap: 6px; font-size: 14px; margin-bottom: 8px; }
+  .fld .k { color: var(--ink-dim); font-size: 10.5px; letter-spacing: 0.05em; flex-shrink: 0; }
+  .fld .leader { flex: 1; border-bottom: 1px dotted var(--line); margin: 0 2px; min-width: 12px; }
   .fld .v { font-weight: 700; word-break: break-all; text-align: right; }
 
   .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-  .badge {
-    font-size: 10.5px;
-    padding: 3px 8px;
-    border: 1px solid var(--ink-dim);
-    color: var(--ink);
-  }
+  .badge { font-size: 10.5px; padding: 3px 8px; border: 1px solid var(--ink-dim); color: var(--ink); }
 
-  .avatar-link {
-    display: inline-block;
-    margin-top: 14px;
-    font-size: 12px;
-    color: var(--red);
-    text-decoration: underline;
-  }
+  .action-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .mini-btn { background: transparent; border: 1px solid var(--line); color: var(--ink-dim);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.03em; padding: 6px 11px; cursor: pointer; }
+  .mini-btn:hover { border-color: var(--red); color: var(--ink); }
+  .mini-btn.copied { border-color: var(--brass); color: var(--brass); }
 
-  .state {
-    padding: 20px 0 0;
-    color: var(--ink-dim);
-    font-size: 13.5px;
-  }
-  .state.error { color: var(--red-bright); }
-  .state .retry-note {
-    display: block;
-    margin-top: 8px;
-    font-size: 12.5px;
-    color: var(--ink-dim);
-  }
-  .cursor {
-    display: inline-block;
-    width: 8px;
-    height: 13px;
-    background: var(--ink-dim);
-    margin-left: 3px;
-    animation: blink 1s steps(1) infinite;
-    vertical-align: -2px;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  footer.note { margin-top: 40px; font-size: 11.5px; color: var(--ink-dim); line-height: 1.7; max-width: 62ch; }
+  footer.note .mark { color: var(--red-glow); }
 
-  footer.note {
-    margin-top: 40px;
-    font-size: 11.5px;
-    color: var(--ink-dim);
-    line-height: 1.6;
-    max-width: 60ch;
-  }
-  footer.note .mark { color: var(--red); }
+  /* ---------- BATCH RESULTS ---------- */
+  .batch-list { margin-top: 24px; border: 1px solid var(--line); }
+  .batch-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .batch-row:last-child { border-bottom: none; }
+  .batch-row img, .batch-row .br-fallback { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; object-fit: cover; }
+  .batch-row .br-fallback { background: var(--bg-2); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--ink-dim); }
+  .batch-row .br-main { flex: 1; min-width: 0; }
+  .batch-row .br-name { font-weight: 700; }
+  .batch-row .br-sub { color: var(--ink-dim); font-size: 11.5px; word-break: break-all; }
+  .batch-row .br-date { color: var(--ink-dim); font-size: 11.5px; text-align: right; flex-shrink: 0; }
+  .batch-row.br-error { color: var(--red-glow); }
 
-  /* sidebar */
-  .side-block { margin-bottom: 34px; }
-  .side-block h3 {
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0 0 3px;
-    border-left: 3px solid var(--red);
-    padding-left: 10px;
-  }
-  .side-block .sub {
-    color: var(--ink-dim);
-    font-size: 12px;
-    margin: 0 0 16px 13px;
-    line-height: 1.5;
-  }
-  .sf-id {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    word-break: break-all;
-    margin: 0 0 12px 13px;
-  }
-  .sf-id span { padding: 0 1px; }
-  .sf-seg {
-    display: flex;
-    gap: 8px;
-    font-size: 12px;
-    margin: 0 0 8px 13px;
-    line-height: 1.4;
-  }
-  .sf-swatch { width: 8px; height: 8px; margin-top: 4px; flex-shrink: 0; }
-  .sf-seg .desc { color: var(--ink-dim); }
-  .sf-seg .label { font-weight: 700; }
+  /* ---------- SIDEBAR / LOWER GRID ---------- */
+  .lower { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; padding-top: 42px; }
+  @media (max-width: 880px) { .lower { grid-template-columns: 1fr; } }
 
-  .fact-list { list-style: none; margin: 0 0 0 13px; padding: 0; }
-  .fact-list li {
-    font-size: 12.5px;
-    line-height: 1.6;
-    color: var(--ink-dim);
-    margin-bottom: 10px;
-    padding-left: 14px;
-    position: relative;
-  }
-  .fact-list li::before { content: '—'; position: absolute; left: 0; color: var(--red); }
-  .fact-list li b { color: var(--ink); }
+  .side-block h3 { font-family: var(--font-display); font-size: 17px; font-weight: 700; margin: 0 0 4px;
+    border-left: 2px solid var(--red); padding-left: 10px; }
+  .side-block .sub { color: var(--ink-dim); font-size: 12px; margin: 0 0 18px 12px; line-height: 1.55; }
 
-  .feature-row {
-    margin-top: 8px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    border-top: 1px solid var(--rule);
-  }
-  @media (max-width: 760px) { .feature-row { grid-template-columns: 1fr; } }
-  .feature-col {
-    padding: 20px 24px;
-    border-right: 1px solid var(--rule);
-  }
-  .feature-col:last-child { border-right: none; }
-  @media (max-width: 760px) {
-    .feature-col { border-right: none; border-bottom: 1px solid var(--rule); }
-  }
-  .feature-col h4 {
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    margin: 0 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--ink);
-    font-weight: 700;
-  }
-  .feature-col ul { margin: 0; padding: 0; list-style: none; }
-  .feature-col li {
-    font-size: 12.5px;
-    color: var(--ink-dim);
-    line-height: 1.9;
-    padding-left: 18px;
-    position: relative;
-  }
-  .feature-col li::before {
-    content: '☐';
-    position: absolute;
-    left: 0;
-    color: var(--ink-dim);
-  }
+  .ring-grid { display: flex; gap: 18px; align-items: center; margin: 0 0 6px 12px; flex-wrap: wrap; }
+  .ring-svg circle { fill: none; stroke-width: 3; }
+  .ring-legend { display: grid; gap: 8px; flex: 1; min-width: 180px; }
+  .ring-row { display: flex; gap: 8px; font-size: 12px; align-items: baseline; }
+  .ring-swatch { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+  .ring-row .desc { color: var(--ink-dim); }
+  .ring-row .label { font-weight: 700; }
+
+  .fact-list { list-style: none; margin: 24px 0 0 12px; padding: 0; }
+  .fact-list li { font-size: 12.5px; line-height: 1.65; color: var(--ink-dim); margin-bottom: 11px; padding-left: 16px; position: relative; }
+  .fact-list li::before { content: ''; position: absolute; left: 0; top: 6px; width: 6px; height: 1.5px; background: var(--red); }
+  .fact-list li b { color: var(--ink); font-weight: 700; }
+
+  .cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid var(--line); margin-top: 6px; }
+  @media (max-width: 760px) { .cols-3 { grid-template-columns: 1fr; } }
+  .col { padding: 20px 22px; border-right: 1px solid var(--line); }
+  .col:last-child { border-right: none; }
+  @media (max-width: 760px) { .col { border-right: none; border-bottom: 1px solid var(--line); } }
+  .col h4 { font-size: 11.5px; letter-spacing: 0.05em; margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); font-weight: 700; }
+  .col ul { margin: 0; padding: 0; list-style: none; }
+  .col li { font-size: 12.5px; color: var(--ink-dim); line-height: 1.9; }
 
   @media (max-width: 420px) {
-    .search-row { flex-direction: column; gap: 12px; }
-    button#lookupBtn { margin-left: 0; padding: 12px; }
+    .search-row { flex-direction: column; }
+    button.action-btn { padding: 13px; }
     .subject-row { flex-direction: column; }
+    .batch-footer { justify-content: stretch; }
+    .batch-footer button.action-btn { width: 100%; padding: 13px; }
   }
 </style>
 </head>
 <body>
-<div class="texture"></div>
+<div class="field"></div>
 
 <div class="wrap">
   <div class="letterhead">
-    <span>FILE NO. <b>DC-0447</b></span>
-    <span>STATUS: <b>OPEN</b></span>
+    <span><span class="pulse-dot"></span>FILE NO. <b>DC-0447</b></span>
+    <button class="theme-toggle" id="themeToggle">LIGHT / DARK</button>
   </div>
 
-  <div class="layout">
-    <div class="main-col">
-      <header>
-        <div class="stamp">Public&nbsp;Record</div>
-        <h1 class="title">Discord ID<br>Trace</h1>
-        <p class="lede">Enter a numeric Discord user ID to pull the public account behind it — name, avatar, badges, and the exact date the account was opened.</p>
-      </header>
-
-      <div class="intake">
-        <label>subject id</label>
-        <div class="search-row">
-          <input id="idInput" type="text" inputmode="numeric" placeholder="80351110224678912" autocomplete="off" />
-          <button id="lookupBtn">Run Trace</button>
-        </div>
-        <div class="hint">Any 15–22 digit snowflake. In Discord: enable Developer Mode, then right-click a user → <b>Copy User ID</b>.</div>
-      </div>
-
-      <div id="result"></div>
-
-      <footer class="note"><span class="mark">*</span> Pulled from a free, public Discord-lookup service — only what Discord already exposes for that ID. No login, no private data, and no way to go the other direction from a username.</footer>
+  <div class="hero">
+    <div>
+      <h1 class="title">Every account<br>leaves a print.</h1>
+      <p class="lede">Discord bakes a permanent fingerprint into every user ID — the exact moment it was created, encoded right into the number. Enter one below and pull the public record behind it.</p>
     </div>
-
-    <div class="side-col">
-      <div class="side-block">
-        <h3>Anatomy of an ID</h3>
-        <p class="sub">A Discord ID is a "snowflake" — one number that quietly encodes when the account was made.</p>
-        <div class="sf-id">
-          <span style="color: var(--red);">80351110224</span><span style="color: var(--red-bright);">6</span><span style="color: var(--ink);">7</span><span style="color: var(--ink-dim);">8912</span>
-        </div>
-        <div class="sf-seg">
-          <span class="sf-swatch" style="background: var(--red);"></span>
-          <span><span class="label">First 42 bits —</span> <span class="desc">ms since Jan 1, 2015</span></span>
-        </div>
-        <div class="sf-seg">
-          <span class="sf-swatch" style="background: var(--red-bright);"></span>
-          <span><span class="label">Next 5 bits —</span> <span class="desc">internal worker ID</span></span>
-        </div>
-        <div class="sf-seg">
-          <span class="sf-swatch" style="background: var(--ink);"></span>
-          <span><span class="label">Next 5 bits —</span> <span class="desc">internal process ID</span></span>
-        </div>
-        <div class="sf-seg">
-          <span class="sf-swatch" style="background: var(--ink-dim);"></span>
-          <span><span class="label">Last 12 bits —</span> <span class="desc">counter for same-ms IDs</span></span>
-        </div>
-      </div>
-
-      <div class="side-block">
-        <h3>Good to know</h3>
-        <ul class="fact-list">
-          <li><b>IDs never change.</b> Names and handles can, the number behind them can't.</li>
-          <li><b>The clock can't be faked.</b> The creation date is baked into the ID itself.</li>
-          <li><b>Works on more than users</b> — servers, messages, and roles use the same format.</li>
-          <li><b>Nothing here needs a login.</b> It's all already public.</li>
-        </ul>
-      </div>
+    <div class="print-wrap">
+      <svg class="print-svg" viewBox="0 0 190 190" xmlns="http://www.w3.org/2000/svg">
+        <path d="M95 15 a80 80 0 1 1 -0.1 0" />
+        <path d="M95 32 a63 63 0 1 1 -0.1 0" />
+        <path d="M95 48 a47 47 0 1 1 -0.1 0" transform="rotate(20 95 95)" />
+        <path d="M95 64 a31 31 0 1 1 -0.1 0" />
+        <path d="M95 80 a15 15 0 1 1 -0.1 0" transform="rotate(-15 95 95)" />
+        <path d="M40 95 a55 55 0 0 0 110 0" transform="rotate(30 95 95)" />
+      </svg>
     </div>
   </div>
 
-  <div class="feature-row">
-    <div class="feature-col">
-      <h4>Provided</h4>
-      <ul>
-        <li>Avatar &amp; banner color</li>
-        <li>Username &amp; display name</li>
-        <li>Public badges</li>
-        <li>Exact creation date</li>
+  <div class="mode-tabs">
+    <button class="mode-tab active" data-mode="single">Single Trace</button>
+    <button class="mode-tab" data-mode="batch">Batch Trace</button>
+  </div>
+
+  <div class="intake" id="singleIntake">
+    <label>subject id</label>
+    <div class="console">
+      <div class="search-row">
+        <input id="idInput" type="text" inputmode="numeric" placeholder="80351110224678912" autocomplete="off" />
+        <button class="action-btn" id="lookupBtn">Run Trace</button>
+      </div>
+    </div>
+    <div class="hint">Any 15–22 digit snowflake. In Discord: enable Developer Mode, then right-click a user → <b>Copy User ID</b>.</div>
+    <div class="history-row" id="historyRow"></div>
+  </div>
+
+  <div class="intake" id="batchIntake" style="display:none;">
+    <label>subject ids — one per line</label>
+    <div class="console">
+      <textarea id="batchInput" placeholder="80351110224678912&#10;250797709009436672&#10;108177103866122240"></textarea>
+      <div class="batch-footer"><button class="action-btn" id="batchBtn">Run Batch</button></div>
+    </div>
+    <div class="hint">Runs each ID one at a time. Bad or invalid lines are skipped and flagged in the results.</div>
+  </div>
+
+  <div id="result"></div>
+
+  <footer class="note"><span class="mark">*</span> Pulled from your own Cloudflare Worker, using Discord's official API — only what Discord already exposes for that ID. No login, no private data, and no way to go the other direction from a username. History is stored only in your own browser.</footer>
+
+  <div class="lower">
+    <div class="side-block">
+      <h3>Anatomy of an ID</h3>
+      <p class="sub">A snowflake is one number wearing five disguises — each ring below is a slice of it.</p>
+      <div class="ring-grid">
+        <svg class="ring-svg" width="92" height="92" viewBox="0 0 92 92">
+          <circle cx="46" cy="46" r="42" stroke="var(--red)" stroke-dasharray="180 84" />
+          <circle cx="46" cy="46" r="33" stroke="color-mix(in srgb, var(--red) 80%, var(--ink))" stroke-dasharray="60 147" />
+          <circle cx="46" cy="46" r="24" stroke="var(--ink)" stroke-dasharray="60 91" />
+          <circle cx="46" cy="46" r="15" stroke="var(--ink-dim)" stroke-dasharray="40 54" />
+          <circle cx="46" cy="46" r="7" stroke="var(--brass)" stroke-dasharray="30 14" />
+        </svg>
+        <div class="ring-legend">
+          <div class="ring-row"><span class="ring-swatch" style="background: var(--red);"></span><span><span class="label">Outer ring —</span> <span class="desc">ms since Jan 1, 2015 (42 bits)</span></span></div>
+          <div class="ring-row"><span class="ring-swatch" style="background: color-mix(in srgb, var(--red) 80%, var(--ink));"></span><span><span class="label">Ring 2 —</span> <span class="desc">internal worker ID (5 bits)</span></span></div>
+          <div class="ring-row"><span class="ring-swatch" style="background: var(--ink);"></span><span><span class="label">Ring 3 —</span> <span class="desc">internal process ID (5 bits)</span></span></div>
+          <div class="ring-row"><span class="ring-swatch" style="background: var(--ink-dim);"></span><span><span class="label">Ring 4 —</span> <span class="desc">counter for same-ms IDs (12 bits)</span></span></div>
+        </div>
+      </div>
+      <ul class="fact-list">
+        <li><b>IDs never change.</b> Names and handles can, the number behind them can't.</li>
+        <li><b>The clock can't be faked.</b> Creation date is baked into the ID itself.</li>
+        <li><b>Works on more than users</b> — servers, messages, and roles use the same format.</li>
       </ul>
     </div>
-    <div class="feature-col">
-      <h4>Not provided</h4>
-      <ul>
-        <li>Email, phone, real name</li>
-        <li>DMs, servers, friends</li>
-        <li>Online status/activity</li>
-        <li>Username → ID reverse lookup</li>
-      </ul>
-    </div>
-    <div class="feature-col">
-      <h4>Source</h4>
-      <ul>
-        <li>Free public lookup API</li>
-        <li>No key or account needed</li>
-        <li>Same data Discord's client shows</li>
-        <li>Nothing stored after lookup</li>
-      </ul>
+
+    <div class="side-block">
+      <h3>Good to know</h3>
+      <p class="sub">What this tool can and can't tell you.</p>
+      <div class="cols-3" style="grid-template-columns: 1fr; margin-top: -6px;">
+        <div class="col" style="border-right:none;">
+          <h4>Provided</h4>
+          <ul><li>Avatar &amp; banner color</li><li>Username &amp; display name</li><li>Public badges</li><li>Exact creation date</li></ul>
+        </div>
+        <div class="col" style="border-top: 1px solid var(--line);">
+          <h4>Not provided</h4>
+          <ul><li>Email, phone, real name</li><li>DMs, servers, friends</li><li>Username → ID reverse lookup</li></ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -499,63 +316,311 @@
 const input = document.getElementById('idInput');
 const btn = document.getElementById('lookupBtn');
 const resultEl = document.getElementById('result');
+const batchInput = document.getElementById('batchInput');
+const batchBtn = document.getElementById('batchBtn');
+const historyRow = document.getElementById('historyRow');
+const themeToggle = document.getElementById('themeToggle');
 
 const SNOWFLAKE_EPOCH = 1420070400000n;
+const WORKER_URL = 'https://quiet-haze-9c51.joemama9bsh.workers.dev';
+const HISTORY_KEY = 'discord_trace_history';
 
+// ---------- theme ----------
+try {
+  const saved = localStorage.getItem('discord_trace_theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+} catch {}
+themeToggle.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('discord_trace_theme', next); } catch {}
+});
+
+// ---------- mode tabs ----------
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const mode = tab.dataset.mode;
+    document.getElementById('singleIntake').style.display = mode === 'single' ? '' : 'none';
+    document.getElementById('batchIntake').style.display = mode === 'batch' ? '' : 'none';
+    resultEl.innerHTML = '';
+  });
+});
+
+// ---------- helpers ----------
 function snowflakeToDate(id) {
-  try {
-    const ms = (BigInt(id) >> 22n) + SNOWFLAKE_EPOCH;
-    return new Date(Number(ms));
-  } catch {
-    return null;
-  }
+  try { return new Date(Number((BigInt(id) >> 22n) + SNOWFLAKE_EPOCH)); } catch { return null; }
 }
-
 function formatDate(d) {
   if (!d) return 'Unknown';
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) +
     ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 }
-
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+function isValidSnowflake(v) { return /^[0-9]{15,22}$/.test(v.trim()); }
 
-function isValidSnowflake(v) {
-  return /^[0-9]{15,22}$/.test(v.trim());
+async function fetchUser(id) {
+  const res = await fetch(`${WORKER_URL}/${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(res.status === 404 ? 'not_found' : 'unreachable');
+  return res.json();
 }
 
+// ---------- history ----------
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+}
+function saveHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 10))); } catch {}
+}
+function addToHistory(entry) {
+  const list = loadHistory().filter(h => h.id !== entry.id);
+  list.unshift(entry);
+  saveHistory(list);
+  renderHistory();
+}
+function renderHistory() {
+  const list = loadHistory();
+  if (!list.length) { historyRow.innerHTML = ''; return; }
+  historyRow.innerHTML = list.map(h => `
+    <span class="history-chip" data-id="${escapeHtml(h.id)}">
+      ${h.avatar ? `<img src="${escapeHtml(h.avatar)}" alt="" />` : `<span class="hc-fallback">${escapeHtml((h.name||'?').slice(0,1).toUpperCase())}</span>`}
+      ${escapeHtml(h.name)}
+    </span>
+  `).join('') + `<button class="history-clear" id="clearHistory">clear</button>`;
+  historyRow.querySelectorAll('.history-chip').forEach(chip => {
+    chip.addEventListener('click', () => { input.value = chip.dataset.id; lookup(); });
+  });
+  const clearBtn = document.getElementById('clearHistory');
+  if (clearBtn) clearBtn.addEventListener('click', () => { saveHistory([]); renderHistory(); });
+}
+renderHistory();
+
+// ---------- export & copy ----------
+function downloadRecord(data, id, created) {
+  const lines = [
+    `DISCORD ID TRACE — FILE DC-0447`,
+    `------------------------------`,
+    `Name: ${data.global_name || data.username || 'Unknown'}`,
+    data.username ? `Handle: @${data.username}` : '',
+    `User ID: ${id}`,
+    `Created: ${formatDate(created)}`,
+    data.bot ? `Type: Bot account` : '',
+    data.avatar && data.avatar.link ? `Avatar: ${data.avatar.link}` : '',
+    ``, `Pulled ${new Date().toLocaleString()}`
+  ].filter(Boolean).join('\n');
+  const blob = new Blob([lines], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `discord-trace-${id}.txt`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+async function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function generatePoster(data, id, created, avatarUrl, btnEl) {
+  const originalLabel = btnEl.textContent;
+  btnEl.textContent = 'Rendering…';
+  btnEl.disabled = true;
+
+  try {
+    const W = 640, H = 860;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // parchment background
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#e9dfc2');
+    grad.addColorStop(1, '#ddd0a8');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+
+    // speckle texture
+    ctx.fillStyle = 'rgba(90,70,40,0.05)';
+    for (let i = 0; i < 900; i++) {
+      const x = Math.random() * W, y = Math.random() * H, r = Math.random() * 1.4;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // vignette
+    const vg = ctx.createRadialGradient(W/2, H/2, H*0.25, W/2, H/2, H*0.72);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(50,35,15,0.35)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, W, H);
+
+    const ink = '#2a2118';
+    ctx.strokeStyle = ink;
+
+    // double border
+    ctx.lineWidth = 5;
+    ctx.strokeRect(24, 24, W - 48, H - 48);
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(34, 34, W - 68, H - 68);
+
+    await document.fonts.ready;
+
+    // headline
+    ctx.fillStyle = ink;
+    ctx.textAlign = 'center';
+    ctx.font = "900 84px Fraunces, serif";
+    ctx.fillText('WANTED', W / 2, 148);
+
+    ctx.font = "700 15px 'Space Mono', monospace";
+    ctx.save();
+    ctx.letterSpacing = '4px';
+    ctx.fillText('IDENTITY CONFIRMED VIA PUBLIC RECORD', W / 2, 178);
+    ctx.restore();
+
+    // photo frame
+    const photoSize = 300, photoX = W/2 - photoSize/2, photoY = 210;
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(photoX - 6, photoY - 6, photoSize + 12, photoSize + 12);
+
+    if (avatarUrl) {
+      try {
+        const img = await loadImage(avatarUrl);
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(photoX, photoY, photoSize, photoSize);
+        ctx.clip();
+        ctx.filter = 'sepia(0.45) contrast(1.08) brightness(0.96)';
+        ctx.drawImage(img, photoX, photoY, photoSize, photoSize);
+        ctx.restore();
+      } catch {
+        ctx.fillStyle = '#c8bb92';
+        ctx.fillRect(photoX, photoY, photoSize, photoSize);
+      }
+    } else {
+      ctx.fillStyle = '#c8bb92';
+      ctx.fillRect(photoX, photoY, photoSize, photoSize);
+      ctx.fillStyle = ink;
+      ctx.font = "900 120px Fraunces, serif";
+      ctx.fillText((data.global_name || data.username || '?').slice(0,1).toUpperCase(), W/2, photoY + photoSize/2 + 42);
+    }
+
+    // name
+    const displayName = data.global_name || data.username || 'Unknown';
+    ctx.fillStyle = ink;
+    ctx.font = "700 40px Fraunces, serif";
+    ctx.fillText(displayName, W / 2, photoY + photoSize + 62);
+
+    if (data.username) {
+      ctx.font = "700 16px 'Space Mono', monospace";
+      ctx.fillText('@' + data.username, W / 2, photoY + photoSize + 88);
+    }
+
+    // divider
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(W/2 - 140, photoY + photoSize + 108);
+    ctx.lineTo(W/2 + 140, photoY + photoSize + 108);
+    ctx.stroke();
+
+    ctx.font = "700 13px 'Space Mono', monospace";
+    ctx.fillText('IN CIRCULATION SINCE', W / 2, photoY + photoSize + 134);
+    ctx.font = "700 18px 'Space Mono', monospace";
+    ctx.fillText(formatDate(created), W / 2, photoY + photoSize + 158);
+
+    ctx.font = "400 12px 'Space Mono', monospace";
+    ctx.fillStyle = '#5c5033';
+    ctx.fillText('CASE FILE DC-0447 · ID ' + id, W / 2, H - 44);
+
+    // QR code -> public Discord profile link
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(`https://discord.com/users/${id}`);
+      qr.make();
+      const count = qr.getModuleCount();
+      const qrSize = 78;
+      const cell = qrSize / count;
+      const qrX = W - 66 - qrSize, qrY = H - 66 - qrSize;
+
+      ctx.fillStyle = '#e9dfc2';
+      ctx.fillRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12);
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12);
+
+      ctx.fillStyle = ink;
+      for (let row = 0; row < count; row++) {
+        for (let col = 0; col < count; col++) {
+          if (qr.isDark(row, col)) {
+            ctx.fillRect(qrX + col * cell, qrY + row * cell, cell + 0.5, cell + 0.5);
+          }
+        }
+      }
+
+      ctx.font = "700 9px 'Space Mono', monospace";
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#5c5033';
+      ctx.fillText('SCAN FOR PROFILE', qrX + qrSize, qrY - 12);
+      ctx.textAlign = 'center';
+    } catch {}
+
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `wanted-${id}.png`;
+    a.click();
+  } catch (err) {
+    alert("Couldn't render the poster — the avatar image may be blocking cross-origin export.");
+  } finally {
+    btnEl.textContent = originalLabel;
+    btnEl.disabled = false;
+  }
+}
+
+async function copyText(text, btnEl) {
+  try {
+    await navigator.clipboard.writeText(text);
+    btnEl.textContent = 'Copied';
+    btnEl.classList.add('copied');
+    setTimeout(() => { btnEl.textContent = btnEl.dataset.label; btnEl.classList.remove('copied'); }, 1400);
+  } catch {}
+}
+
+// ---------- single lookup ----------
 async function lookup() {
   const id = input.value.trim();
   if (!id) return;
-
   if (!isValidSnowflake(id)) {
     resultEl.innerHTML = `<div class="state error">That doesn't look like a Discord ID — it should be 15–22 plain digits, no letters or symbols.</div>`;
     return;
   }
-
   btn.disabled = true;
   const fallbackDate = snowflakeToDate(id);
-  resultEl.innerHTML = `<div class="state">searching records for ${escapeHtml(id)}<span class="cursor"></span></div>`;
+  resultEl.innerHTML = `<div class="radar-state"><div class="radar"></div><span>scanning for ${escapeHtml(id)}</span></div>`;
 
   try {
-    const res = await fetch(`https://quiet-haze-9c51.joemama9bsh.workers.dev/${encodeURIComponent(id)}`);
-    if (!res.ok) {
-      if (res.status === 404) {
-        resultEl.innerHTML = `<div class="state error">No account found for that ID. Double-check it was copied correctly.</div>`;
-      } else {
-        throw new Error('bad status');
-      }
-      return;
-    }
-    const data = await res.json();
+    const data = await fetchUser(id);
     renderResult(data, id, fallbackDate);
+    addToHistory({ id, name: data.global_name || data.username || id, avatar: data.avatar?.link || null });
   } catch (err) {
-    resultEl.innerHTML = `
-      <div class="state error">
-        Couldn't reach the record service right now.
-        <span class="retry-note">The ID alone tells us this account was created on ${escapeHtml(formatDate(fallbackDate))}. Try again in a moment for the rest.</span>
-      </div>`;
+    if (err.message === 'not_found') {
+      resultEl.innerHTML = `<div class="state error">No account found for that ID. Double-check it was copied correctly.</div>`;
+    } else {
+      resultEl.innerHTML = `
+        <div class="state error">
+          Couldn't reach the record service right now.
+          <span class="retry-note">The ID alone tells us this account was created on ${escapeHtml(formatDate(fallbackDate))}. Try again in a moment for the rest.</span>
+        </div>`;
+    }
   } finally {
     btn.disabled = false;
   }
@@ -571,7 +636,6 @@ function renderResult(data, id, fallbackDate) {
   const badgeHtml = badges.length
     ? `<div class="badges">${badges.map(b => `<span class="badge">${escapeHtml(b.name || b)}</span>`).join('')}</div>`
     : '';
-
   const photo = avatarUrl
     ? `<img class="photo" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}'s avatar" />`
     : `<div class="photo fallback">${escapeHtml((displayName || '?').slice(0,1).toUpperCase())}</div>`;
@@ -579,6 +643,7 @@ function renderResult(data, id, fallbackDate) {
   resultEl.innerHTML = `
     <div class="sheet">
       <div class="subject-row">
+        <div class="verified-stamp">On record</div>
         <div class="photo-block">
           ${photo}
           <div class="photo-tag">EXHIBIT A</div>
@@ -591,15 +656,66 @@ function renderResult(data, id, fallbackDate) {
           ${data.bot ? `<div class="fld"><span class="k">TYPE</span><span class="leader"></span><span class="v">Bot account</span></div>` : ''}
           ${data.accent_color ? `<div class="fld"><span class="k">ACCENT</span><span class="leader"></span><span class="v">${escapeHtml(data.accent_color)}</span></div>` : ''}
           ${badgeHtml}
-          ${avatarUrl ? `<a class="avatar-link" href="${escapeHtml(avatarUrl)}" target="_blank" rel="noopener">Open full-size photo</a>` : ''}
+          <div class="action-row">
+            <button class="mini-btn" id="copyIdBtn" data-label="Copy ID">Copy ID</button>
+            ${avatarUrl ? `<button class="mini-btn" id="copyAvatarBtn" data-label="Copy avatar link">Copy avatar link</button>` : ''}
+            <button class="mini-btn" id="saveRecordBtn" data-label="Save record">Save record</button>
+            <button class="mini-btn" id="posterBtn" data-label="Wanted poster">Wanted poster</button>
+          </div>
         </div>
       </div>
     </div>
   `;
+
+  document.getElementById('copyIdBtn').addEventListener('click', e => copyText(id, e.target));
+  const copyAvatarBtn = document.getElementById('copyAvatarBtn');
+  if (copyAvatarBtn) copyAvatarBtn.addEventListener('click', e => copyText(avatarUrl, e.target));
+  document.getElementById('saveRecordBtn').addEventListener('click', () => downloadRecord(data, id, created));
+  document.getElementById('posterBtn').addEventListener('click', e => generatePoster(data, id, created, avatarUrl, e.target));
 }
 
 btn.addEventListener('click', lookup);
 input.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
+
+// ---------- batch lookup ----------
+async function runBatch() {
+  const ids = batchInput.value.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!ids.length) return;
+  batchBtn.disabled = true;
+  resultEl.innerHTML = `<div class="radar-state"><div class="radar"></div><span>scanning ${ids.length} subject${ids.length > 1 ? 's' : ''}</span></div>`;
+
+  const rows = [];
+  for (const rawId of ids) {
+    if (!isValidSnowflake(rawId)) {
+      rows.push({ id: rawId, error: 'invalid ID format' });
+      continue;
+    }
+    const fallbackDate = snowflakeToDate(rawId);
+    try {
+      const data = await fetchUser(rawId);
+      const created = data.created_at ? new Date(data.created_at) : fallbackDate;
+      rows.push({ id: rawId, data, created });
+      addToHistory({ id: rawId, name: data.global_name || data.username || rawId, avatar: data.avatar?.link || null });
+    } catch (err) {
+      rows.push({ id: rawId, error: err.message === 'not_found' ? 'no account found' : 'unreachable' });
+    }
+  }
+
+  resultEl.innerHTML = `<div class="batch-list">${rows.map(r => {
+    if (r.error) {
+      return `<div class="batch-row br-error"><div class="br-fallback">!</div><div class="br-main"><div class="br-name">${escapeHtml(r.id)}</div><div class="br-sub">${escapeHtml(r.error)}</div></div></div>`;
+    }
+    const name = r.data.global_name || r.data.username || 'Unknown';
+    const avatarUrl = r.data.avatar && r.data.avatar.link ? r.data.avatar.link : null;
+    const photo = avatarUrl
+      ? `<img src="${escapeHtml(avatarUrl)}" alt="" />`
+      : `<div class="br-fallback">${escapeHtml((name||'?').slice(0,1).toUpperCase())}</div>`;
+    return `<div class="batch-row">${photo}<div class="br-main"><div class="br-name">${escapeHtml(name)}</div><div class="br-sub">${escapeHtml(r.id)}</div></div><div class="br-date">${escapeHtml(formatDate(r.created))}</div></div>`;
+  }).join('')}</div>`;
+
+  batchBtn.disabled = false;
+}
+batchBtn.addEventListener('click', runBatch);
 </script>
 </body>
 </html>
