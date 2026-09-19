@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case File — Discord ID Trace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;700;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #0d0c0c;
+    --paper-2: #151312;
+    --ink: #e9e4dd;
+    --ink-dim: #9a9088;
+    --rule: #3a3230;
+    --red: #b8121f;
+    --red-bright: #d81f2c;
+    color-scheme: dark;
+    --font-head: 'Bitter', serif;
+    --font-type: 'Courier Prime', monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --paper: #efe9dc;
+      --paper-2: #e6ded0;
+      --ink: #201c18;
+      --ink-dim: #6b6156;
+      --rule: #c9bfa9;
+      --red: #a3101c;
+      --red-bright: #c21a26;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #efe9dc;
+    --paper-2: #e6ded0;
+    --ink: #201c18;
+    --ink-dim: #6b6156;
+    --rule: #c9bfa9;
+    --red: #a3101c;
+    --red-bright: #c21a26;
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-type);
+  }
+
+  .texture {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(color-mix(in srgb, var(--ink) 6%, transparent) 1px, transparent 1px);
+    background-size: 3px 3px;
+    opacity: 0.55;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 44px 26px 80px;
+  }
+
+  /* letterhead */
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--ink-dim);
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .letterhead b { color: var(--ink); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+    gap: 0 48px;
+    align-items: start;
+  }
+  .main-col { min-width: 0; border-right: 1px solid var(--rule); padding-right: 48px; }
+  .side-col { padding-top: 30px; }
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    .main-col { border-right: none; padding-right: 0; }
+  }
+
+  header {
+    position: relative;
+    padding: 30px 0 26px;
+  }
+  h1.title {
+    font-family: var(--font-head);
+    font-weight: 900;
+    font-size: clamp(32px, 5vw, 46px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    max-width: 12ch;
+  }
+  header p.lede {
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--ink-dim);
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  .stamp {
+    position: absolute;
+    top: 18px;
+    right: 0;
+    transform: rotate(-7deg);
+    border: 3px solid var(--red);
+    padding: 6px 12px;
+    color: var(--red);
+    font-family: var(--font-head);
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.9;
+    mix-blend-mode: multiply;
+  }
+  @media (max-width: 560px) { .stamp { position: static; display: inline-block; margin-bottom: 14px; transform: rotate(-3deg); } }
+
+  .intake {
+    border-top: 3px double var(--ink);
+    border-bottom: 3px double var(--ink);
+    padding: 22px 0;
+  }
+  .intake label {
+    display: block;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    margin-bottom: 8px;
+  }
+  .search-row {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+  }
+  input#idInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    padding: 8px 4px;
+    color: var(--ink);
+    font-family: var(--font-type);
+    font-weight: 700;
+    font-size: 16px;
+    outline: none;
+    min-width: 0;
+    border-radius: 0;
+  }
+  input#idInput::placeholder { color: var(--ink-dim); font-weight: 400; }
+  input#idInput:focus { border-bottom-color: var(--red); }
+
+  button#lookupBtn {
+    margin-left: 16px;
+    background: var(--red);
+    color: var(--paper);
+    border: none;
+    padding: 0 20px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.12s ease;
+    border-radius: 0;
+  }
+  button#lookupBtn:hover { background: var(--red-bright); }
+  button#lookupBtn:active { transform: translateY(1px); }
+  button#lookupBtn:disabled { opacity: 0.5; cursor: default; }
+
+  .hint {
+    color: var(--ink-dim);
+    font-size: 12.5px;
+    margin-top: 14px;
+    line-height: 1.55;
+  }
+  .hint b { color: var(--ink); font-weight: 700; }
+
+  #result { margin-top: 0; }
+
+  .sheet {
+    margin-top: 26px;
+    border-top: 1px solid var(--rule);
+    padding-top: 22px;
+  }
+
+  .subject-row {
+    display: flex;
+    gap: 20px;
+  }
+  .photo-block { flex-shrink: 0; text-align: center; }
+  .photo {
+    width: 84px;
+    height: 84px;
+    object-fit: cover;
+    border: 2px solid var(--ink);
+    filter: grayscale(0.35) contrast(1.05);
+    display: block;
+  }
+  .photo.fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-head);
+    font-weight: 900;
+    font-size: 30px;
+    color: var(--ink-dim);
+    background: var(--paper-2);
+  }
+  .photo-tag {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    color: var(--ink-dim);
+    margin-top: 5px;
+  }
+
+  .subject-fields { flex: 1; min-width: 0; }
+  .fld {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-size: 14px;
+    margin-bottom: 7px;
+  }
+  .fld .k {
+    color: var(--ink-dim);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .fld .leader {
+    flex: 1;
+    border-bottom: 1px dotted var(--rule);
+    margin: 0 2px;
+    min-width: 12px;
+  }
+  .fld .v { font-weight: 700; word-break: break-all; text-align: right; }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+  .badge {
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border: 1px solid var(--ink-dim);
+    color: var(--ink);
+  }
+
+  .avatar-link {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--red);
+    text-decoration: underline;
+  }
+
+  .state {
+    padding: 20px 0 0;
+    color: var(--ink-dim);
+    font-size: 13.5px;
+  }
+  .state.error { color: var(--red-bright); }
+  .state .retry-note {
+    display: block;
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+  }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 13px;
+    background: var(--ink-dim);
+    margin-left: 3px;
+    animation: blink 1s steps(1) infinite;
+    vertical-align: -2px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+
+  footer.note {
+    margin-top: 40px;
+    font-size: 11.5px;
+    color: var(--ink-dim);
+    line-height: 1.6;
+    max-width: 60ch;
+  }
+  footer.note .mark { color: var(--red); }
+
+  /* sidebar */
+  .side-block { margin-bottom: 34px; }
+  .side-block h3 {
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 3px;
+    border-left: 3px solid var(--red);
+    padding-left: 10px;
+  }
+  .side-block .sub {
+    color: var(--ink-dim);
+    font-size: 12px;
+    margin: 0 0 16px 13px;
+    line-height: 1.5;
+  }
+  .sf-id {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    word-break: break-all;
+    margin: 0 0 12px 13px;
+  }
+  .sf-id span { padding: 0 1px; }
+  .sf-seg {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    margin: 0 0 8px 13px;
+    line-height: 1.4;
+  }
+  .sf-swatch { width: 8px; height: 8px; margin-top: 4px; flex-shrink: 0; }
+  .sf-seg .desc { color: var(--ink-dim); }
+  .sf-seg .label { font-weight: 700; }
+
+  .fact-list { list-style: none; margin: 0 0 0 13px; padding: 0; }
+  .fact-list li {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+    padding-left: 14px;
+    position: relative;
+  }
+  .fact-list li::before { content: '—'; position: absolute; left: 0; color: var(--red); }
+  .fact-list li b { color: var(--ink); }
+
+  .feature-row {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+  }
+  @media (max-width: 760px) { .feature-row { grid-template-columns: 1fr; } }
+  .feature-col {
+    padding: 20px 24px;
+    border-right: 1px solid var(--rule);
+  }
+  .feature-col:last-child { border-right: none; }
+  @media (max-width: 760px) {
+    .feature-col { border-right: none; border-bottom: 1px solid var(--rule); }
+  }
+  .feature-col h4 {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ink);
+    font-weight: 700;
+  }
+  .feature-col ul { margin: 0; padding: 0; list-style: none; }
+  .feature-col li {
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    line-height: 1.9;
+    padding-left: 18px;
+    position: relative;
+  }
+  .feature-col li::before {
+    content: '☐';
+    position: absolute;
+    left: 0;
+    color: var(--ink-dim);
+  }
+
+  @media (max-width: 420px) {
+    .search-row { flex-direction: column; gap: 12px; }
+    button#lookupBtn { margin-left: 0; padding: 12px; }
+    .subject-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="texture"></div>
+
+<div class="wrap">
+  <div class="letterhead">
+    <span>FILE NO. <b>DC-0447</b></span>
+    <span>STATUS: <b>OPEN</b></span>
+  </div>
+
+  <div class="layout">
+    <div class="main-col">
+      <header>
+        <div class="stamp">Public&nbsp;Record</div>
+        <h1 class="title">Discord ID<br>Trace</h1>
+        <p class="lede">Enter a numeric Discord user ID to pull the public account behind it — name, avatar, badges, and the exact date the account was opened.</p>
+      </header>
+
+      <div class="intake">
+        <label>subject id</label>
+        <div class="search-row">
+          <input id="idInput" type="text" inputmode="numeric" placeholder="80351110224678912" autocomplete="off" />
+          <button id="lookupBtn">Run Trace</button>
+        </div>
+        <div class="hint">Any 15–22 digit snowflake. In Discord: enable Developer Mode, then right-click a user → <b>Copy User ID</b>.</div>
+      </div>
+
+      <div id="result"></div>
+
+      <footer class="note"><span class="mark">*</span> Pulled from a free, public Discord-lookup service — only what Discord already exposes for that ID. No login, no private data, and no way to go the other direction from a username.</footer>
+    </div>
+
+    <div class="side-col">
+      <div class="side-block">
+        <h3>Anatomy of an ID</h3>
+        <p class="sub">A Discord ID is a "snowflake" — one number that quietly encodes when the account was made.</p>
+        <div class="sf-id">
+          <span style="color: var(--red);">80351110224</span><span style="color: var(--red-bright);">6</span><span style="color: var(--ink);">7</span><span style="color: var(--ink-dim);">8912</span>
+        </div>
+        <div class="sf-seg">
+          <span class="sf-swatch" style="background: var(--red);"></span>
+          <span><span class="label">First 42 bits —</span> <span class="desc">ms since Jan 1, 2015</span></span>
+        </div>
+        <div class="sf-seg">
+          <span class="sf-swatch" style="background: var(--red-bright);"></span>
+          <span><span class="label">Next 5 bits —</span> <span class="desc">internal worker ID</span></span>
+        </div>
+        <div class="sf-seg">
+          <span class="sf-swatch" style="background: var(--ink);"></span>
+          <span><span class="label">Next 5 bits —</span> <span class="desc">internal process ID</span></span>
+        </div>
+        <div class="sf-seg">
+          <span class="sf-swatch" style="background: var(--ink-dim);"></span>
+          <span><span class="label">Last 12 bits —</span> <span class="desc">counter for same-ms IDs</span></span>
+        </div>
+      </div>
+
+      <div class="side-block">
+        <h3>Good to know</h3>
+        <ul class="fact-list">
+          <li><b>IDs never change.</b> Names and handles can, the number behind them can't.</li>
+          <li><b>The clock can't be faked.</b> The creation date is baked into the ID itself.</li>
+          <li><b>Works on more than users</b> — servers, messages, and roles use the same format.</li>
+          <li><b>Nothing here needs a login.</b> It's all already public.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="feature-row">
+    <div class="feature-col">
+      <h4>Provided</h4>
+      <ul>
+        <li>Avatar &amp; banner color</li>
+        <li>Username &amp; display name</li>
+        <li>Public badges</li>
+        <li>Exact creation date</li>
+      </ul>
+    </div>
+    <div class="feature-col">
+      <h4>Not provided</h4>
+      <ul>
+        <li>Email, phone, real name</li>
+        <li>DMs, servers, friends</li>
+        <li>Online status/activity</li>
+        <li>Username → ID reverse lookup</li>
+      </ul>
+    </div>
+    <div class="feature-col">
+      <h4>Source</h4>
+      <ul>
+        <li>Free public lookup API</li>
+        <li>No key or account needed</li>
+        <li>Same data Discord's client shows</li>
+        <li>Nothing stored after lookup</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+const input = document.getElementById('idInput');
+const btn = document.getElementById('lookupBtn');
+const resultEl = document.getElementById('result');
+
+const SNOWFLAKE_EPOCH = 1420070400000n;
+
+function snowflakeToDate(id) {
+  try {
+    const ms = (BigInt(id) >> 22n) + SNOWFLAKE_EPOCH;
+    return new Date(Number(ms));
+  } catch {
+    return null;
+  }
+}
+
+function formatDate(d) {
+  if (!d) return 'Unknown';
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) +
+    ' · ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function isValidSnowflake(v) {
+  return /^[0-9]{15,22}$/.test(v.trim());
+}
+
+async function lookup() {
+  const id = input.value.trim();
+  if (!id) return;
+
+  if (!isValidSnowflake(id)) {
+    resultEl.innerHTML = `<div class="state error">That doesn't look like a Discord ID — it should be 15–22 plain digits, no letters or symbols.</div>`;
+    return;
+  }
+
+  btn.disabled = true;
+  const fallbackDate = snowflakeToDate(id);
+  resultEl.innerHTML = `<div class="state">searching records for ${escapeHtml(id)}<span class="cursor"></span></div>`;
+
+  try {
+    const res = await fetch(`https://discordlookup.mesalytic.moe/v1/user/${encodeURIComponent(id)}`);
+    if (!res.ok) {
+      if (res.status === 404) {
+        resultEl.innerHTML = `<div class="state error">No account found for that ID. Double-check it was copied correctly.</div>`;
+      } else {
+        throw new Error('bad status');
+      }
+      return;
+    }
+    const data = await res.json();
+    renderResult(data, id, fallbackDate);
+  } catch (err) {
+    resultEl.innerHTML = `
+      <div class="state error">
+        Couldn't reach the record service right now.
+        <span class="retry-note">The ID alone tells us this account was created on ${escapeHtml(formatDate(fallbackDate))}. Try again in a moment for the rest.</span>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function renderResult(data, id, fallbackDate) {
+  const username = data.username ? `@${data.username}` : '';
+  const displayName = data.global_name || data.username || 'Unknown';
+  const avatarUrl = data.avatar && data.avatar.link ? data.avatar.link : null;
+  const created = data.created_at ? new Date(data.created_at) : fallbackDate;
+  const badges = Array.isArray(data.badges) ? data.badges : [];
+
+  const badgeHtml = badges.length
+    ? `<div class="badges">${badges.map(b => `<span class="badge">${escapeHtml(b.name || b)}</span>`).join('')}</div>`
+    : '';
+
+  const photo = avatarUrl
+    ? `<img class="photo" src="${escapeHtml(avatarUrl)}" alt="${escapeHtml(displayName)}'s avatar" />`
+    : `<div class="photo fallback">${escapeHtml((displayName || '?').slice(0,1).toUpperCase())}</div>`;
+
+  resultEl.innerHTML = `
+    <div class="sheet">
+      <div class="subject-row">
+        <div class="photo-block">
+          ${photo}
+          <div class="photo-tag">EXHIBIT A</div>
+        </div>
+        <div class="subject-fields">
+          <div class="fld"><span class="k">NAME</span><span class="leader"></span><span class="v">${escapeHtml(displayName)}</span></div>
+          ${username ? `<div class="fld"><span class="k">HANDLE</span><span class="leader"></span><span class="v">${escapeHtml(username)}</span></div>` : ''}
+          <div class="fld"><span class="k">USER ID</span><span class="leader"></span><span class="v">${escapeHtml(id)}</span></div>
+          <div class="fld"><span class="k">CREATED</span><span class="leader"></span><span class="v">${escapeHtml(formatDate(created))}</span></div>
+          ${data.bot ? `<div class="fld"><span class="k">TYPE</span><span class="leader"></span><span class="v">Bot account</span></div>` : ''}
+          ${data.accent_color ? `<div class="fld"><span class="k">ACCENT</span><span class="leader"></span><span class="v">${escapeHtml(data.accent_color)}</span></div>` : ''}
+          ${badgeHtml}
+          ${avatarUrl ? `<a class="avatar-link" href="${escapeHtml(avatarUrl)}" target="_blank" rel="noopener">Open full-size photo</a>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+btn.addEventListener('click', lookup);
+input.addEventListener('keydown', e => { if (e.key === 'Enter') lookup(); });
+</script>
+</body>
+</html>
